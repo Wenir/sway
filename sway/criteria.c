@@ -12,6 +12,7 @@
 
 enum criteria_type { // *must* keep in sync with criteria_strings[]
 	CRIT_CLASS,
+	CRIT_CON_MARK,
 	CRIT_ID,
 	CRIT_INSTANCE,
 	CRIT_TITLE,
@@ -25,6 +26,7 @@ enum criteria_type { // *must* keep in sync with criteria_strings[]
 // this *must* match the ordering in criteria_type enum
 static const char * const criteria_strings[] = {
 	"class",
+	"con_mark",
 	"id",
 	"instance",
 	"title",
@@ -281,6 +283,18 @@ static bool criteria_test(swayc_t *cont, list_t *tokens) {
 				}
 			} else if (crit->regex && regexec(crit->regex, cont->instance, 0, NULL, 0) == 0) {
 				matches++;
+			}
+			break;
+		case CRIT_CON_MARK:
+			if (!cont->marks) {
+				// ignore
+			} else if (crit->regex) {
+				for (int i = 0; i < cont->marks->length; i++) {
+					if (regexec(crit->regex, cont->marks->items[i], 0, NULL, 0) == 0) {
+						matches++;
+						break;
+					}
+				}
 			}
 			break;
 		case CRIT_TITLE:

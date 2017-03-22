@@ -117,6 +117,7 @@ struct sway_container {
 	char *class;
 	char *instance;
 	char *app_id;
+	list_t *marks;
 
 	// Used by output containers to keep track of swaybg child processes.
 	pid_t bg_pid;
@@ -218,6 +219,10 @@ swayc_t *destroy_container(swayc_t *container);
  * non-empty parent container, or NULL.
  */
 swayc_t *destroy_view(swayc_t *view);
+/**
+ * Frees all marks in container
+ */
+void delete_all_marks(swayc_t *container);
 
 /**
  * Finds a container based on test criteria. Returns the first container that

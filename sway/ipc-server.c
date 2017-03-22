@@ -464,6 +464,18 @@ void ipc_client_handle_command(struct ipc_client *client) {
 		goto exit_cleanup;
 	}
 
+	case IPC_GET_MARKS:
+	{
+		if (!(client->security_policy & IPC_FEATURE_GET_MARKS)) {
+			goto exit_denied;
+		}
+		json_object *marks = ipc_json_describe_marks(&root_container);
+		const char *json_string = json_object_to_json_string(marks);
+		ipc_send_reply(client, json_string, (uint32_t) strlen(json_string));
+		json_object_put(marks);
+		goto exit_cleanup;
+	}
+
 	case IPC_GET_VERSION:
 	{
 		json_object *version = ipc_json_get_version();

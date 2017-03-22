@@ -37,6 +37,10 @@ static swayc_t *new_swayc(enum swayc_types type) {
 	if (type != C_VIEW) {
 		c->children = create_list();
 	}
+	// compatibility with i3
+	if (type >= C_WORKSPACE) {
+		c->marks = create_list();
+	}
 	return c;
 }
 
@@ -75,6 +79,10 @@ static void free_swayc(swayc_t *cont) {
 	}
 	if (cont->app_id) {
 		free(cont->app_id);
+	}
+	if (cont->marks) {
+		delete_all_marks(cont);
+		list_free(cont->marks);
 	}
 	if (cont->bg_pid != 0) {
 		terminate_swaybg(cont->bg_pid);
@@ -520,6 +528,13 @@ swayc_t *destroy_view(swayc_t *view) {
 		return destroy_container(parent);
 	}
 	return parent;
+}
+
+void delete_all_marks(swayc_t *container) {
+	for (int i = 0; i < container->marks->length; i++) {
+		free(container->marks->items[i]);
+	}
+	container->marks->length = 0;
 }
 
 // Container lookup

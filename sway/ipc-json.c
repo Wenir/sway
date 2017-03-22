@@ -203,6 +203,12 @@ static void ipc_json_describe_view(swayc_t *c, json_object *object) {
 	json_object_object_add(object, "app_id", c->app_id ? json_object_new_string(c->app_id) : NULL);
 }
 
+static void ipc_json_add_marks_to_array(swayc_t *c, json_object *array) {
+	for (int i = 0; i < c->marks->length; i++) {
+		json_object_array_add(array, json_object_new_string(c->marks->items[i]));
+	}
+}
+
 json_object *ipc_json_describe_container(swayc_t *c) {
 	if (!(sway_assert(c, "Container must not be null."))) {
 		return NULL;
@@ -215,6 +221,18 @@ json_object *ipc_json_describe_container(swayc_t *c) {
 	json_object_object_add(object, "rect", ipc_json_create_rect(c));
 	json_object_object_add(object, "visible", json_object_new_boolean(c->visible));
 	json_object_object_add(object, "focused", json_object_new_boolean(c == current_focus));
+
+	if (c->marks) {
+		json_object *marks = json_object_new_array();
+
+		ipc_json_add_marks_to_array(c, marks);
+
+		if (json_object_array_length(marks) > 0) {
+			json_object_object_add(object, "marks", marks);
+		} else {
+			json_object_put(marks);
+		}
+	}
 
 	switch (c->type) {
 	case C_ROOT:
@@ -241,6 +259,15 @@ json_object *ipc_json_describe_container(swayc_t *c) {
 
 	return object;
 }
+
+json_object *ipc_json_describe_marks(swayc_t *c) {
+	json_object *marks = json_object_new_array();
+
+	container_map(c, (void (*)(swayc_t *, void *)) ipc_json_add_marks_to_array, marks);
+
+	return marks;
+}
+
 
 json_object *ipc_json_get_version() {
 	json_object *version = json_object_new_object();
